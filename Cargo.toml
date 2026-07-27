@@ -1,0 +1,12 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/rupert-core",
+    "crates/rupert-discord",
+    "crates/rupert-telegram",
+]
+
+[workspace.dependencies]
+tokio = "1.53.1"
+tracing = "0.1.44"
+serde = "1.0.229"
