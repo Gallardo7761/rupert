@@ -1,12 +1,16 @@
 [workspace]
-resolver = "2"
-members = [
-    "crates/rupert-core",
-    "crates/rupert-discord",
-    "crates/rupert-telegram",
-]
+resolver = "3"
+members = ["crates/*"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "GNU GPL v3"
 
 [workspace.dependencies]
-tokio = "1.53.1"
-tracing = "0.1.44"
-serde = "1.0.229"
+rupert-core = { path = "crates/rupert-core" }
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+dotenvy = "0.15"
+serenity = { version = "0.12", default-features = false, features = ["client", "gateway", "model", "rustls_backend"] }
+chrono = "0.4.45"
+colored = "3.1.1"
