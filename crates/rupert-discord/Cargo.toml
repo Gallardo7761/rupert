@@ -1,9 +1,11 @@
 [package]
 name = "rupert-discord"
-version = "0.1.0"
-edition = "2021"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
 
 [dependencies]
-rupert-core = { path = "../rupert-core" }
-poise = "0.6"
-tokio = { workspace = true }
+rupert-core.workspace = true
+serenity.workspace = true
+tokio.workspace = true
+dotenvy.workspace = true
