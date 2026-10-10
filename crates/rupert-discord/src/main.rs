@@ -1,5 +1,6 @@
 mod bot;
 mod commands;
+mod embeds;
 
 use rupert_core::logging::{RLogger, RLoggerContext};
 use serenity::{

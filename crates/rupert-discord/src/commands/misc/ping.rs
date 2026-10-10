@@ -17,7 +17,7 @@ impl RCommand for Ping {
     }
 
     fn register(&self) -> CreateCommand {
-        CreateCommand::new(self.name()).description("Pings the bot to test latency")
+        CreateCommand::new(self.name()).description("Testea la latencia del bot")
     }
 
     async fn run(&self, ctx: &Context, cmd: &CommandInteraction) -> CommandResult {

@@ -9,3 +9,4 @@ rupert-core.workspace = true
 serenity.workspace = true
 tokio.workspace = true
 dotenvy.workspace = true
+rand.workspace = true

@@ -14,5 +14,8 @@ pub trait RCommand: Send + Sync {
 }
 
 pub fn get_all() -> Vec<Box<dyn RCommand>> {
-    vec![Box::new(misc::ping::Ping)]
+    vec![
+        Box::new(misc::ping::Ping),
+        Box::new(misc::dice::Dice)
+    ]
 }
