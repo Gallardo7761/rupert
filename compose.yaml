@@ -1,0 +1,26 @@
+name: rupert
+
+services:
+  discord:
+    build: .
+    image: rupert-discord:${RUPERT_VERSION:-latest}
+    container_name: rupert-discord
+    restart: unless-stopped
+    init: true
+    volumes:
+      - type: bind
+        source: ${RUPERT_ENV_FILE:-./.env}
+        target: /app/.env
+        read_only: true
+        bind:
+          create_host_path: false
+    networks:
+      - core_net
+    logging:
+      options:
+        max-size: 10m
+        max-file: "3"
+
+networks:
+  core_net:
+    external: true
