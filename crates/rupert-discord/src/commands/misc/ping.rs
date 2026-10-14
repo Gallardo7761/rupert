@@ -2,11 +2,13 @@ use std::time::Instant;
 
 use serenity::{
     all::{
-        CommandInteraction, Context, CreateCommand, CreateInteractionResponse, CreateInteractionResponseMessage, EditInteractionResponse,
-    }, async_trait,
+        CommandInteraction, Context, CreateCommand, CreateInteractionResponseMessage,
+        EditInteractionResponse,
+    },
+    async_trait,
 };
 
-use crate::commands::{CommandResult, RCommand};
+use crate::commands::{CommandResult, RCommand, reply};
 
 pub struct Ping;
 
@@ -22,18 +24,17 @@ impl RCommand for Ping {
 
     async fn run(&self, ctx: &Context, cmd: &CommandInteraction) -> CommandResult {
         let before = Instant::now();
-        
-        let response = CreateInteractionResponse::Message(
-            CreateInteractionResponseMessage::new().content("Pong!"),
-        );
 
-        cmd.create_response(&ctx.http, response).await?;
+        reply::send(
+            ctx,
+            cmd,
+            CreateInteractionResponseMessage::new().content("Pong!"),
+        )
+        .await?;
 
         let elapsed = before.elapsed().as_millis();
 
-        let edited = EditInteractionResponse::new()
-            .content(format!("Pong! ({}ms)", elapsed));
-
+        let edited = EditInteractionResponse::new().content(format!("Pong! ({elapsed}ms)"));
         cmd.edit_response(&ctx.http, edited).await?;
 
         Ok(())

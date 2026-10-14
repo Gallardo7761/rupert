@@ -7,16 +7,16 @@ use crate::commands::{self, RCommand};
 
 pub struct Bot {
     logger: RLogger,
-    guild_id: GuildId,
+    guild_ids: Vec<GuildId>,
     commands: Vec<Box<dyn RCommand>>,
 }
 
 impl Bot {
-    pub fn new(guild_id: GuildId) -> Self {
+    pub fn new(guild_ids: Vec<GuildId>) -> Self {
         let logger: RLogger = RLogger::new(RLoggerContext::Discord);
         Self {
             logger,
-            guild_id,
+            guild_ids,
             commands: commands::get_all(),
         }
     }
@@ -27,17 +27,28 @@ impl EventHandler for Bot {
     async fn ready(&self, ctx: Context, ready: Ready) {
         self.logger.info("Registering commands...");
 
-        if let Err(e) = self
-            .guild_id
-            .set_commands(
-                &ctx.http,
-                self.commands.iter().map(|c| c.register()).collect(),
-            )
-            .await
-        {
-            self.logger.error(format!("Could not register command").as_str(), &e);
-        } else {
-            self.logger.info("Command registered");
+        for id in &self.guild_ids {
+            match id
+                .set_commands(
+                    &ctx.http,
+                    self.commands.iter().map(|c| c.register()).collect(),
+                )
+                .await
+            {
+                Ok(registered) => {
+                    let names = registered
+                        .iter()
+                        .map(|c| c.name.as_str())
+                        .collect::<Vec<_>>()
+                        .join(", ");
+                    self.logger
+                        .info(&format!("Registered in guild {id}: {names}"));
+                }
+                Err(e) => {
+                    self.logger
+                        .error(&format!("Could not register commands in guild {id}"), &e);
+                }
+            }
         }
 
         self.logger
@@ -46,8 +57,12 @@ impl EventHandler for Bot {
 
     async fn interaction_create(&self, ctx: Context, interaction: Interaction) {
         if let Interaction::Command(cmd) = interaction {
-            self.logger
-                .info(&format!("{} ran /{}", cmd.user.name, cmd.data.name));
+            let place = cmd.guild_id.map_or("DM".to_string(), |id| id.to_string());
+
+            self.logger.info(&format!(
+                "{} ran /{} on {}",
+                cmd.user.name, cmd.data.name, place
+            ));
 
             let Some(command) = self
                 .commands

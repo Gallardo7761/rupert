@@ -10,3 +10,4 @@ serenity.workspace = true
 tokio.workspace = true
 dotenvy.workspace = true
 rand.workspace = true
+chrono.workspace = true

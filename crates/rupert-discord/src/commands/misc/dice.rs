@@ -1,22 +1,23 @@
+use rupert_core::fun;
 use serenity::{
     all::{
-        CommandInteraction, CommandOptionType, Context, 
-        CreateCommand, CreateCommandOption, CreateInteractionResponse, 
-        CreateInteractionResponseMessage, ResolvedOption, ResolvedValue,
-    }, async_trait,
+        CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
+        CreateInteractionResponseMessage,
+    },
+    async_trait,
 };
 
-use rupert_core::fun;
-use crate::embeds;
-
-use crate::commands::{CommandResult, RCommand};
+use crate::{
+    commands::{CommandResult, RCommand, options, reply},
+    embeds,
+};
 
 pub struct Dice;
 
 #[async_trait]
 impl RCommand for Dice {
     fn name(&self) -> &str {
-        "dado"
+        "dice"
     }
 
     fn register(&self) -> CreateCommand {
@@ -24,23 +25,16 @@ impl RCommand for Dice {
             .description("Tira un dado")
             .add_option(CreateCommandOption::new(
                 CommandOptionType::String,
-                "tipo",
-                "Tipo de dado. Ej: d6, d4, d10"
+                "type",
+                "Tipo de dado. Ej: d6, d4, d10",
             ))
     }
 
     async fn run(&self, ctx: &Context, cmd: &CommandInteraction) -> CommandResult {
-        let options = cmd.data.options();
-        
-        let dice_type = match options.first() {
-            Some(ResolvedOption {
-                value: ResolvedValue::String(s),
-                ..
-            }) => *s,
-            _ => "d6",
-        };
-        
-        let message = match fun::dice_faces(dice_type) {
+        let dice_type =
+            options::get_string(&cmd.data.options(), "type").unwrap_or_else(|| "d6".to_string());
+
+        let message = match fun::dice_faces(&dice_type) {
             Some(faces) => {
                 let result = fun::roll(faces);
                 let embed = embeds::base()
@@ -54,9 +48,6 @@ impl RCommand for Dice {
                 .ephemeral(true),
         };
 
-        cmd.create_response(&ctx.http, CreateInteractionResponse::Message(message))
-        .await?;
-
-        Ok(())
+        reply::send(ctx, cmd, message).await
     }
 }

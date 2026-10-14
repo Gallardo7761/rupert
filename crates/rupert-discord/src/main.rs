@@ -1,6 +1,7 @@
 mod bot;
 mod commands;
 mod embeds;
+mod permissions;
 
 use rupert_core::logging::{RLogger, RLoggerContext};
 use serenity::{
@@ -17,12 +18,12 @@ async fn run() -> Result<(), Box<dyn std::error::Error>> {
     let token = get_token()?;
     logger.info("I've got my token, logging in...");
 
-    let guild_id = get_guild_id()?;
-    logger.info(format!("Chatting on guild {}", guild_id).as_str());
+    let guild_ids = get_guild_ids()?;
+    logger.info(format!("Chatting on guilds {:?}", guild_ids).as_str());
 
     let intents = GatewayIntents::empty();
     let mut client = Client::builder(token, intents)
-        .event_handler(Bot::new(guild_id))
+        .event_handler(Bot::new(guild_ids))
         .await?;
 
     client.start().await?;
@@ -43,7 +44,11 @@ fn get_token() -> Result<String, Box<dyn std::error::Error>> {
     Ok(dotenvy::var("DISCORD_TOKEN")?)
 }
 
-fn get_guild_id() -> Result<GuildId, Box<dyn std::error::Error>> {
-    let guild_id = dotenvy::var("GUILD_ID")?.parse::<u64>()?;
-    Ok(GuildId::new(guild_id))
+fn get_guild_ids() -> Result<Vec<GuildId>, Box<dyn std::error::Error>> {
+    let raw = dotenvy::var("GUILD_IDS")?;
+    let ids = raw
+        .split(',')
+        .map(|s| s.trim().parse::<u64>().map(GuildId::new))
+        .collect::<Result<Vec<_>, _>>()?;
+    Ok(ids)
 }
