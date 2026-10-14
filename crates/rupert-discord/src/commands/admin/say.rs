@@ -14,7 +14,6 @@ use serenity::{
 use crate::{
     commands::{CommandResult, RCommand, options, reply},
     embeds,
-    permissions::has_permission,
 };
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -77,6 +76,10 @@ impl RCommand for Say {
         "say"
     }
 
+    fn permission(&self) -> Option<Permissions> {
+        Some(Permissions::MANAGE_GUILD)
+    }
+
     fn register(&self) -> CreateCommand {
         let level_option = Level::ALL.into_iter().fold(
             CreateCommandOption::new(
@@ -95,7 +98,6 @@ impl RCommand for Say {
 
         CreateCommand::new(self.name())
             .description("Publica un anuncio")
-            .default_member_permissions(Permissions::MANAGE_GUILD)
             .add_option(level_option)
             .add_option(
                 CreateCommandOption::new(
@@ -108,15 +110,6 @@ impl RCommand for Say {
     }
 
     async fn run(&self, ctx: &Context, cmd: &CommandInteraction) -> CommandResult {
-        if !has_permission(cmd, Permissions::MANAGE_GUILD) {
-            return reply::send(
-                ctx,
-                cmd,
-                reply::error_message("No tienes permisos para publicar anuncios"),
-            )
-            .await;
-        }
-
         let (level, channel) = {
             let options = cmd.data.options();
             (

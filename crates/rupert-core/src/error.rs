@@ -27,6 +27,41 @@ impl fmt::Display for CalcError {
 
 impl std::error::Error for CalcError {}
 
+#[derive(Debug, PartialEq)]
+pub enum HierarchyError {
+    SelfTarget,
+    TargetIsBot,
+    TargetIsOwner,
+    TargetTooHigh,
+    BotTooLow,
+    RoleTooHigh,
+    BotRoleTooLow,
+}
+
+impl fmt::Display for HierarchyError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            HierarchyError::SelfTarget => write!(f, "No puedes usar esto contigo mismo"),
+            HierarchyError::TargetIsBot => write!(f, "No puedes usar esto conmigo"),
+            HierarchyError::TargetIsOwner => {
+                write!(f, "No puedes usar esto con el dueño del servidor")
+            }
+            HierarchyError::TargetTooHigh => {
+                write!(f, "Su rol más alto es igual o superior al tuyo")
+            }
+            HierarchyError::BotTooLow => write!(f, "Su rol más alto es igual o superior al mío"),
+            HierarchyError::RoleTooHigh => {
+                write!(f, "Ese rol es igual o superior a tu rol más alto")
+            }
+            HierarchyError::BotRoleTooLow => {
+                write!(f, "Ese rol es igual o superior a mi rol más alto")
+            }
+        }
+    }
+}
+
+impl std::error::Error for HierarchyError {}
+
 impl From<mathengine::Error> for CalcError {
     fn from(e: mathengine::Error) -> Self {
         match e {

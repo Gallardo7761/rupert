@@ -10,10 +10,7 @@ use serenity::{
     async_trait,
 };
 
-use crate::{
-    commands::{CommandResult, RCommand, options, reply},
-    permissions::has_permission,
-};
+use crate::commands::{CommandResult, RCommand, options, reply};
 
 const MIN_ANSWERS: usize = 2;
 const MAX_ANSWERS: usize = 10;
@@ -51,10 +48,13 @@ impl RCommand for Poll {
         "poll"
     }
 
+    fn permission(&self) -> Option<Permissions> {
+        Some(Permissions::MANAGE_GUILD)
+    }
+
     fn register(&self) -> CreateCommand {
         CreateCommand::new(self.name())
             .description("Crea una votación")
-            .default_member_permissions(Permissions::MANAGE_GUILD)
             .add_option(
                 CreateCommandOption::new(
                     CommandOptionType::Integer,
@@ -83,15 +83,6 @@ impl RCommand for Poll {
     }
 
     async fn run(&self, ctx: &Context, cmd: &CommandInteraction) -> CommandResult {
-        if !has_permission(cmd, Permissions::MANAGE_GUILD) {
-            return reply::send(
-                ctx,
-                cmd,
-                reply::error_message("No tienes permisos para crear encuestas"),
-            )
-            .await;
-        }
-
         let (duration, multiple, channel) = {
             let options = cmd.data.options();
             (

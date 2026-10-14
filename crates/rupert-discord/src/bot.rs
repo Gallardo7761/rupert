@@ -1,9 +1,10 @@
 use rupert_core::logging::{RLogger, RLoggerContext};
-use serenity::all::{EventHandler, GuildId, Interaction, Ready};
+use serenity::all::{CreateCommand, EventHandler, GuildId, Interaction, Ready};
 use serenity::async_trait;
 use serenity::prelude::Context;
 
-use crate::commands::{self, RCommand};
+use crate::commands::{self, RCommand, reply};
+use crate::permissions::has_permission;
 
 pub struct Bot {
     logger: RLogger,
@@ -22,6 +23,14 @@ impl Bot {
     }
 }
 
+fn build_command(command: &dyn RCommand) -> CreateCommand {
+    let builder = command.register();
+    match command.permission() {
+        Some(permissions) => builder.default_member_permissions(permissions),
+        None => builder,
+    }
+}
+
 #[async_trait]
 impl EventHandler for Bot {
     async fn ready(&self, ctx: Context, ready: Ready) {
@@ -31,7 +40,10 @@ impl EventHandler for Bot {
             match id
                 .set_commands(
                     &ctx.http,
-                    self.commands.iter().map(|c| c.register()).collect(),
+                    self.commands
+                        .iter()
+                        .map(|c| build_command(c.as_ref()))
+                        .collect(),
                 )
                 .await
             {
@@ -73,6 +85,16 @@ impl EventHandler for Bot {
                     .warn(&format!("Unknown command /{}", cmd.data.name));
                 return;
             };
+
+            if let Some(required) = command.permission()
+                && !has_permission(&cmd, required)
+            {
+                let message = reply::error_message("No tienes permisos para usar este comando");
+                if let Err(e) = reply::send(&ctx, &cmd, message).await {
+                    self.logger.error("Error replying to command", e.as_ref());
+                }
+                return;
+            }
 
             if let Err(e) = command.run(&ctx, &cmd).await {
                 self.logger.error("Error running command", e.as_ref());
