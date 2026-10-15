@@ -1,4 +1,5 @@
 pub mod admin;
+pub mod interaction;
 pub mod math;
 pub mod misc;
 pub mod options;
@@ -20,6 +21,10 @@ pub trait RCommand: Send + Sync {
     }
     fn register(&self) -> CreateCommand;
     async fn run(&self, ctx: &Context, cmd: &CommandInteraction) -> CommandResult;
+    /// Answers the suggestions of options registered with `set_autocomplete(true)`.
+    async fn autocomplete(&self, _ctx: &Context, _cmd: &CommandInteraction) -> CommandResult {
+        Ok(())
+    }
 }
 
 #[async_trait]
@@ -45,6 +50,8 @@ pub fn get_all() -> Vec<Box<dyn RCommand>> {
         Box::new(admin::Admin::new()),
         Box::new(admin::say::Say),
         Box::new(admin::poll::Poll),
+        // interaction
+        Box::new(interaction::interact::Interact::new()),
         // math
         Box::new(math::prime::Prime),
         Box::new(math::calc::Calc),

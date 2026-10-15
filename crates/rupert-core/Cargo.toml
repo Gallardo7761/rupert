@@ -9,3 +9,4 @@ chrono.workspace = true
 colored.workspace = true
 rand = "0.10.3"
 mathengine.workspace = true
+nekosbest.workspace = true

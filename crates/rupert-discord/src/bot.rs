@@ -1,5 +1,5 @@
 use rupert_core::logging::{RLogger, RLoggerContext};
-use serenity::all::{CreateCommand, EventHandler, GuildId, Interaction, Ready};
+use serenity::all::{CommandInteraction, CreateCommand, EventHandler, GuildId, Interaction, Ready};
 use serenity::async_trait;
 use serenity::prelude::Context;
 
@@ -19,6 +19,51 @@ impl Bot {
             logger,
             guild_ids,
             commands: commands::get_all(),
+        }
+    }
+
+    fn command(&self, name: &str) -> Option<&dyn RCommand> {
+        let command = self.commands.iter().find(|c| c.name() == name);
+        if command.is_none() {
+            self.logger.warn(&format!("Unknown command /{name}"));
+        }
+        command.map(|c| c.as_ref())
+    }
+
+    async fn run_command(&self, ctx: &Context, cmd: &CommandInteraction) {
+        let place = cmd.guild_id.map_or("DM".to_string(), |id| id.to_string());
+        self.logger.info(&format!(
+            "{} ran /{} on {}",
+            cmd.user.name, cmd.data.name, place
+        ));
+
+        let Some(command) = self.command(&cmd.data.name) else {
+            return;
+        };
+
+        if let Some(required) = command.permission()
+            && !has_permission(cmd, required)
+        {
+            let message = reply::error_message("No tienes permisos para usar este comando");
+            if let Err(e) = reply::send(ctx, cmd, message).await {
+                self.logger.error("Error replying to command", e.as_ref());
+            }
+            return;
+        }
+
+        if let Err(e) = command.run(ctx, cmd).await {
+            self.logger.error("Error running command", e.as_ref());
+        }
+    }
+
+    async fn autocomplete(&self, ctx: &Context, cmd: &CommandInteraction) {
+        let Some(command) = self.command(&cmd.data.name) else {
+            return;
+        };
+
+        if let Err(e) = command.autocomplete(ctx, cmd).await {
+            self.logger
+                .error("Error autocompleting command", e.as_ref());
         }
     }
 }
@@ -68,37 +113,10 @@ impl EventHandler for Bot {
     }
 
     async fn interaction_create(&self, ctx: Context, interaction: Interaction) {
-        if let Interaction::Command(cmd) = interaction {
-            let place = cmd.guild_id.map_or("DM".to_string(), |id| id.to_string());
-
-            self.logger.info(&format!(
-                "{} ran /{} on {}",
-                cmd.user.name, cmd.data.name, place
-            ));
-
-            let Some(command) = self
-                .commands
-                .iter()
-                .find(|c| c.name() == cmd.data.name.as_str())
-            else {
-                self.logger
-                    .warn(&format!("Unknown command /{}", cmd.data.name));
-                return;
-            };
-
-            if let Some(required) = command.permission()
-                && !has_permission(&cmd, required)
-            {
-                let message = reply::error_message("No tienes permisos para usar este comando");
-                if let Err(e) = reply::send(&ctx, &cmd, message).await {
-                    self.logger.error("Error replying to command", e.as_ref());
-                }
-                return;
-            }
-
-            if let Err(e) = command.run(&ctx, &cmd).await {
-                self.logger.error("Error running command", e.as_ref());
-            }
+        match interaction {
+            Interaction::Command(cmd) => self.run_command(&ctx, &cmd).await,
+            Interaction::Autocomplete(cmd) => self.autocomplete(&ctx, &cmd).await,
+            _ => {}
         }
     }
 }

@@ -62,6 +62,27 @@ impl fmt::Display for HierarchyError {
 
 impl std::error::Error for HierarchyError {}
 
+#[derive(Debug)]
+pub struct GifError(nekosbest::NekosBestError);
+
+impl fmt::Display for GifError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "No se pudo conseguir el GIF")
+    }
+}
+
+impl std::error::Error for GifError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        Some(&self.0)
+    }
+}
+
+impl From<nekosbest::NekosBestError> for GifError {
+    fn from(e: nekosbest::NekosBestError) -> Self {
+        Self(e)
+    }
+}
+
 impl From<mathengine::Error> for CalcError {
     fn from(e: mathengine::Error) -> Self {
         match e {
