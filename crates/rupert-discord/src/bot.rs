@@ -1,15 +1,25 @@
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::time::Duration;
+
 use rupert_core::logging::{RLogger, RLoggerContext};
-use serenity::all::{CommandInteraction, CreateCommand, EventHandler, GuildId, Interaction, Ready};
+use rupert_core::status::RActivityType::{Listening, Playing, Watching};
+use rupert_core::status::{self, RStatus};
+use serenity::all::{
+    ActivityData, CommandInteraction, CreateCommand, EventHandler, GuildId, Interaction, Ready,
+};
 use serenity::async_trait;
 use serenity::prelude::Context;
 
 use crate::commands::{self, RCommand, reply};
 use crate::permissions::has_permission;
 
+const STATUS_INTERVAL: Duration = Duration::from_mins(30);
+
 pub struct Bot {
     logger: RLogger,
     guild_ids: Vec<GuildId>,
     commands: Vec<Box<dyn RCommand>>,
+    status_started: AtomicBool,
 }
 
 impl Bot {
@@ -19,6 +29,7 @@ impl Bot {
             logger,
             guild_ids,
             commands: commands::get_all(),
+            status_started: AtomicBool::new(false),
         }
     }
 
@@ -66,13 +77,20 @@ impl Bot {
                 .error("Error autocompleting command", e.as_ref());
         }
     }
-}
 
-fn build_command(command: &dyn RCommand) -> CreateCommand {
-    let builder = command.register();
-    match command.permission() {
-        Some(permissions) => builder.default_member_permissions(permissions),
-        None => builder,
+    fn start_status_rotation(&self, ctx: Context) {
+        if self.status_started.swap(true, Ordering::Relaxed) {
+            return;
+        }
+
+        tokio::spawn(async move {
+            let mut interval = tokio::time::interval(STATUS_INTERVAL);
+            loop {
+                interval.tick().await;
+                ctx.set_activity(Some(activity(status::random())));
+            }
+        });
+        self.logger.info("Status rotation started");
     }
 }
 
@@ -108,8 +126,9 @@ impl EventHandler for Bot {
             }
         }
 
-        self.logger
-            .info(format!("{} initialized. I'm ready papi.", ready.user.name).as_str());
+        self.start_status_rotation(ctx);
+
+        self.logger.info(format!("{} initialized. I'm ready papi.", ready.user.name).as_str());
     }
 
     async fn interaction_create(&self, ctx: Context, interaction: Interaction) {
@@ -118,5 +137,21 @@ impl EventHandler for Bot {
             Interaction::Autocomplete(cmd) => self.autocomplete(&ctx, &cmd).await,
             _ => {}
         }
+    }
+}
+
+fn build_command(command: &dyn RCommand) -> CreateCommand {
+    let builder = command.register();
+    match command.permission() {
+        Some(permissions) => builder.default_member_permissions(permissions),
+        None => builder,
+    }
+}
+
+fn activity(status: RStatus) -> ActivityData {
+    match status.activity_type() {
+        Playing => ActivityData::playing(status.name()),
+        Listening => ActivityData::listening(status.name()),
+        Watching => ActivityData::watching(status.name()),
     }
 }
