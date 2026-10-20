@@ -9,11 +9,11 @@ license = "GNU GPL v3"
 
 [workspace.dependencies]
 rupert-core = { path = "crates/rupert-core" }
-tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "time"] }
 dotenvy = "0.15"
 serenity = { version = "0.12", default-features = false, features = ["client", "gateway", "model", "rustls_backend", "collector", "utils",] }
 chrono = "0.4.45"
 colored = "3.1.1"
-rand = "0.9"
+rand = "0.10.3"
 mathengine = "0.1.1"
 nekosbest = "0.21"

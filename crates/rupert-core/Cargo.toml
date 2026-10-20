@@ -7,6 +7,6 @@ license.workspace = true
 [dependencies]
 chrono.workspace = true
 colored.workspace = true
-rand = "0.10.3"
+rand.workspace = true
 mathengine.workspace = true
 nekosbest.workspace = true
