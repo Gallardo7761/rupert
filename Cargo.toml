@@ -11,9 +11,12 @@ license = "GNU GPL v3"
 rupert-core = { path = "crates/rupert-core" }
 tokio = { version = "1", features = ["macros", "rt-multi-thread", "time"] }
 dotenvy = "0.15"
-serenity = { version = "0.12", default-features = false, features = ["client", "gateway", "model", "rustls_backend", "collector", "utils",] }
+serenity = { version = "0.12", default-features = false, features = ["client", "gateway", "model", "rustls_backend", "collector", "utils", "voice", "cache"] }
 chrono = "0.4.45"
 colored = "3.1.1"
 rand = "0.10.3"
 mathengine = "0.1.1"
 nekosbest = "0.21"
+reqwest = { version = "0.12", default-features = false }
+songbird = "0.6"
+symphonia = { version = "0.5", features = ["aac", "mp3", "isomp4", "alac"] }
