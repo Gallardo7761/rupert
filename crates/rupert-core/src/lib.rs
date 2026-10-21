@@ -4,4 +4,5 @@ pub mod interaction;
 pub mod logging;
 pub mod math;
 pub mod moderation;
+pub mod music;
 pub mod status;
