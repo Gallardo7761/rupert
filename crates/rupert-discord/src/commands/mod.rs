@@ -2,6 +2,7 @@ pub mod admin;
 pub mod interaction;
 pub mod math;
 pub mod misc;
+pub mod music;
 pub mod options;
 pub mod reply;
 
@@ -62,5 +63,13 @@ pub fn get_all() -> Vec<Box<dyn RCommand>> {
         Box::new(misc::banana::Banana),
         Box::new(misc::avatar::Avatar),
         Box::new(misc::ship::Ship),
+        // music
+        Box::new(music::play::Play),
+        Box::new(music::skip::Skip),
+        Box::new(music::pause::Pause),
+        Box::new(music::resume::Resume),
+        Box::new(music::stop::Stop),
+        Box::new(music::queue::Queue),
+        Box::new(music::leave::Leave),
     ]
 }

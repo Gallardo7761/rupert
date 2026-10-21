@@ -128,7 +128,8 @@ impl EventHandler for Bot {
 
         self.start_status_rotation(ctx);
 
-        self.logger.info(format!("{} initialized. I'm ready papi.", ready.user.name).as_str());
+        self.logger
+            .info(format!("{} initialized. I'm ready papi.", ready.user.name).as_str());
     }
 
     async fn interaction_create(&self, ctx: Context, interaction: Interaction) {
