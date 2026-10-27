@@ -2896,32 +2896,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "vito-core"
-version = "1.2.0-alpha"
-dependencies = [
- "chrono",
- "colored",
- "mathengine",
- "nekosbest",
- "rand 0.10.3",
-]
-
-[[package]]
-name = "vito-discord"
-version = "1.2.0-alpha"
-dependencies = [
- "chrono",
- "dotenvy",
- "rand 0.10.3",
- "reqwest 0.12.28",
- "vito-core",
- "serenity",
- "songbird",
- "symphonia",
- "tokio",
-]
-
-[[package]]
 name = "rustc-hash"
 version = "2.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4447,6 +4421,32 @@ name = "version_check"
 version = "0.9.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0b928f33d975fc6ad9f86c8f283853ad26bdd5b10b7f1542aa2fa15e2289105a"
+
+[[package]]
+name = "vito-core"
+version = "1.2.0"
+dependencies = [
+ "chrono",
+ "colored",
+ "mathengine",
+ "nekosbest",
+ "rand 0.10.3",
+]
+
+[[package]]
+name = "vito-discord"
+version = "1.2.0"
+dependencies = [
+ "chrono",
+ "dotenvy",
+ "rand 0.10.3",
+ "reqwest 0.12.28",
+ "serenity",
+ "songbird",
+ "symphonia",
+ "tokio",
+ "vito-core",
+]
 
 [[package]]
 name = "want"
