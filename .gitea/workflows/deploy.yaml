@@ -10,7 +10,7 @@ jobs:
     container:
       image: catthehacker/ubuntu:act-latest
     env:
-      RUPERT_ENV_FILE: ${{ vars.RUPERT_ENV_FILE || '/opt/docker/bots/.env' }}
+      VITO_ENV_FILE: ${{ vars.VITO_ENV_FILE || '/opt/docker/bots/.env' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -31,14 +31,14 @@ jobs:
 
       - name: Image
         env:
-          RUPERT_VERSION: ${{ steps.version.outputs.version }}
+          VITO_VERSION: ${{ steps.version.outputs.version }}
         run: |
           docker compose build
-          docker tag "rupert-discord:$RUPERT_VERSION" rupert-discord:latest
+          docker tag "vito-discord:$VITO_VERSION" vito-discord:latest
 
       - name: Container
         env:
-          RUPERT_VERSION: ${{ steps.version.outputs.version }}
+          VITO_VERSION: ${{ steps.version.outputs.version }}
         run: docker compose up -d --no-build --remove-orphans
 
       - name: Git tag

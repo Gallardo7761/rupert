@@ -1,0 +1,16 @@
+[package]
+name = "vito-discord"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+vito-core.workspace = true
+serenity.workspace = true
+tokio.workspace = true
+dotenvy.workspace = true
+rand.workspace = true
+chrono.workspace = true
+reqwest.workspace = true
+songbird.workspace = true
+symphonia.workspace = true

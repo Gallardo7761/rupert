@@ -1,15 +1,15 @@
-name: rupert
+name: vito
 
 services:
   discord:
     build: .
-    image: rupert-discord:${RUPERT_VERSION:-latest}
-    container_name: rupert-discord
+    image: vito-discord:${VITO_VERSION:-latest}
+    container_name: vito-discord
     restart: unless-stopped
     init: true
     volumes:
       - type: bind
-        source: ${RUPERT_ENV_FILE:-./.env}
+        source: ${VITO_ENV_FILE:-./.env}
         target: /app/.env
         read_only: true
         bind:

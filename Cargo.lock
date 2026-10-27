@@ -2896,7 +2896,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "rupert-core"
+name = "vito-core"
 version = "1.2.0-alpha"
 dependencies = [
  "chrono",
@@ -2907,14 +2907,14 @@ dependencies = [
 ]
 
 [[package]]
-name = "rupert-discord"
+name = "vito-discord"
 version = "1.2.0-alpha"
 dependencies = [
  "chrono",
  "dotenvy",
  "rand 0.10.3",
  "reqwest 0.12.28",
- "rupert-core",
+ "vito-core",
  "serenity",
  "songbird",
  "symphonia",

@@ -1,4 +1,4 @@
-# Rupert
+# Vito
 
 Bot de Discord escrito en Rust (y en el futuro, de Telegram). Es la reimplementación de mi bot antiguo en Python, **Pype**.
 
@@ -16,8 +16,8 @@ Bot de Discord escrito en Rust (y en el futuro, de Telegram). Es la reimplementa
 
 Es un workspace de Cargo con tres crates:
 
-- `crates/rupert-core`: lógica sin dependencias de ninguna plataforma (tiradas, primos, calculadora, jerarquía de moderación, interacciones…). Aquí van los tests.
-- `crates/rupert-discord`: el binario del bot de Discord, sobre [serenity](https://github.com/serenity-rs/serenity) 0.12.
+- `crates/vito-core`: lógica sin dependencias de ninguna plataforma (tiradas, primos, calculadora, jerarquía de moderación, interacciones…). Aquí van los tests.
+- `crates/vito-discord`: el binario del bot de Discord, sobre [serenity](https://github.com/serenity-rs/serenity) 0.12.
 
 ## Requisitos
 
@@ -43,16 +43,16 @@ Los comandos se registran por servidor, y no de forma global, así que salen al 
 ## Compilar y ejecutar en local
 
 ```bash
-cargo run -p rupert-discord
+cargo run -p vito-discord
 ```
 
 Para compilar en modo release:
 
 ```bash
-cargo build --release -p rupert-discord
+cargo build --release -p vito-discord
 ```
 
-El binario queda en `target/release/rupert-discord`. Ejecútalo desde el directorio donde tengas el `.env`.
+El binario queda en `target/release/vito-discord`. Ejecútalo desde el directorio donde tengas el `.env`.
 
 ## Despliegue con Docker
 
@@ -80,8 +80,8 @@ Variables opcionales de Compose:
 
 | Variable | Por defecto | Descripción |
 | --- | --- | --- |
-| `RUPERT_ENV_FILE` | `./.env` | La ruta en el host del `.env` que se monta. |
-| `RUPERT_VERSION` | `latest` | La etiqueta de la imagen `rupert-discord`. |
+| `VITO_ENV_FILE` | `./.env` | La ruta en el host del `.env` que se monta. |
+| `VITO_VERSION` | `latest` | La etiqueta de la imagen `vito-discord`. |
 
 ## Licencia
 

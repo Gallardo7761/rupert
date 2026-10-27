@@ -14,8 +14,8 @@ COPY . .
 RUN --mount=type=cache,target=/usr/local/cargo/registry \
     --mount=type=cache,target=/app/target,sharing=locked \
     cargo test --workspace --release --locked \
-    && cargo build --release --locked -p rupert-discord \
-    && cp target/release/rupert-discord /usr/local/bin/rupert-discord
+    && cargo build --release --locked -p vito-discord \
+    && cp target/release/vito-discord /usr/local/bin/vito-discord
 
 FROM debian:${DEBIAN}-slim
 RUN apt-get update \
@@ -23,9 +23,9 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 ADD --chmod=755 https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_linux /usr/local/bin/yt-dlp
 COPY --from=denoland/deno:bin /deno /usr/local/bin/deno
-RUN groupadd --system --gid 10001 rupert \
-    && useradd --system --uid 10001 --gid 10001 --no-create-home rupert
-COPY --from=builder /usr/local/bin/rupert-discord /usr/local/bin/rupert-discord
+RUN groupadd --system --gid 10001 vito \
+    && useradd --system --uid 10001 --gid 10001 --no-create-home vito
+COPY --from=builder /usr/local/bin/vito-discord /usr/local/bin/vito-discord
 WORKDIR /app
-USER rupert
-CMD ["rupert-discord"]
+USER vito
+CMD ["vito-discord"]
