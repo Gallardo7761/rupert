@@ -1,3 +1,4 @@
+use vito_core::logging::{VLogger, VLoggerContext};
 use vito_core::music::query::{self, Query};
 use vito_core::music::track::Track;
 use serenity::{
@@ -96,6 +97,11 @@ impl VCommand for Play {
                 return Err(e);
             }
         };
+        VLogger::new(VLoggerContext::Discord).info(&format!(
+            "\"{input}\" resolved to \"{}\" <{}>",
+            track.title(),
+            track.url()
+        ));
 
         let position = {
             let mut players = playback.players.lock().await;

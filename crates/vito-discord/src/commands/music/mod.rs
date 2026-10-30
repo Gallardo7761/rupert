@@ -19,7 +19,7 @@ use serenity::all::{
 use serenity::async_trait;
 use serenity::prelude::TypeMapKey;
 use songbird::input::YoutubeDl;
-use songbird::tracks::{TrackHandle, TrackResult};
+use songbird::tracks::{PlayMode, TrackHandle, TrackResult};
 use songbird::{Event, EventContext, Songbird, TrackEvent};
 use tokio::sync::Mutex;
 
@@ -172,9 +172,18 @@ impl Playback {
             .get(self.guild_id)
             .ok_or("not in a voice channel")?;
 
+        VLogger::new(VLoggerContext::Discord).info(&format!(
+            "Playing \"{}\" <{}>",
+            track.title(),
+            track.url()
+        ));
         let source = YoutubeDl::new(self.http.clone(), track.url().to_string());
         let handle = call.lock().await.play_input(source.into());
         handle.add_event(Event::Track(TrackEvent::End), TrackEnd(self.clone()))?;
+        handle.add_event(
+            Event::Track(TrackEvent::Error),
+            TrackError(track.title().to_string()),
+        )?;
 
         self.players
             .lock()
@@ -202,6 +211,23 @@ impl songbird::EventHandler for TrackEnd {
             && let Err(e) = self.0.play(&track).await
         {
             VLogger::new(VLoggerContext::Discord).error("Error playing next track", e.as_ref());
+        }
+        None
+    }
+}
+
+struct TrackError(String);
+
+#[async_trait]
+impl songbird::EventHandler for TrackError {
+    async fn act(&self, ctx: &EventContext<'_>) -> Option<Event> {
+        if let EventContext::Track(tracks) = ctx {
+            for (state, _) in *tracks {
+                if let PlayMode::Errored(e) = &state.playing {
+                    VLogger::new(VLoggerContext::Discord)
+                        .error(&format!("Error playing \"{}\"", self.0), e);
+                }
+            }
         }
         None
     }
