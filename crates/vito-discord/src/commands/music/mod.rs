@@ -7,6 +7,7 @@ pub mod skip;
 pub mod stop;
 
 use std::collections::HashMap;
+use std::process::{Command, Stdio};
 use std::sync::Arc;
 
 use vito_core::logging::{VLogger, VLoggerContext};
@@ -18,7 +19,7 @@ use serenity::all::{
 };
 use serenity::async_trait;
 use serenity::prelude::TypeMapKey;
-use songbird::input::YoutubeDl;
+use songbird::input::ChildContainer;
 use songbird::tracks::{PlayMode, TrackHandle, TrackResult};
 use songbird::{Event, EventContext, Songbird, TrackEvent};
 use tokio::sync::Mutex;
@@ -177,7 +178,7 @@ impl Playback {
             track.title(),
             track.url()
         ));
-        let source = YoutubeDl::new(self.http.clone(), track.url().to_string());
+        let source = stream(track.url())?;
         let handle = call.lock().await.play_input(source.into());
         handle.add_event(Event::Track(TrackEvent::End), TrackEnd(self.clone()))?;
         handle.add_event(
@@ -193,6 +194,27 @@ impl Playback {
             .handle = Some(handle);
         Ok(())
     }
+}
+
+/// Lets yt-dlp download the audio and pipe it to songbird: YouTube answers 403
+/// to the single whole-file request songbird's own HTTP source would make.
+fn stream(url: &str) -> std::io::Result<ChildContainer> {
+    let child = Command::new("yt-dlp")
+        .args([
+            "-q",
+            "--no-playlist",
+            "--no-cache-dir",
+            "-f",
+            "ba[abr>0][vcodec=none]/best",
+            "-o",
+            "-",
+            "--",
+            url,
+        ])
+        .stdin(Stdio::null())
+        .stdout(Stdio::piped())
+        .spawn()?;
+    Ok(child.into())
 }
 
 struct TrackEnd(Playback);
